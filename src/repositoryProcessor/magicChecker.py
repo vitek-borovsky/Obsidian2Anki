@@ -7,9 +7,11 @@ class MagicChecker(ABC):
     def get_magic(self, readable: IO[str]) -> str | None:
         raise RuntimeError("Called MagicChecker.check() an abstract class")
 
-# TODO if we find the magic we still need to progress the readable
-# to the end of metadata
+
 class ObsidianMagicChecker(MagicChecker):
+    """TODO if we find the magic we still need to progress the readable
+    to the end of metadata
+    """
     METADATA_SEPARATOR = "---"
     ANKI_TAG_KEY = "Anki"
     REGEX_KEY_KEY = "__KEY__"
@@ -33,7 +35,7 @@ class ObsidianMagicChecker(MagicChecker):
         # Read until we reach the end of metadata
         while True:
             line = readable.readline()
-            if line == "": # EOF
+            if line == "":  # EOF
                 break
             line = line.rstrip()
 

@@ -2,7 +2,11 @@ from typing import IO, Generator
 import re
 
 from .fileProcessingConstants import FileProcessingConstans
-from ..ankiCard import AnkiBasicCard, AnkiCard, AnkiFileRecord, get_empty_anki_generator
+from ..ankiCard import \
+    AnkiCard, \
+    AnkiBasicCard, \
+    AnkiFileRecord
+
 from .magicChecker import MagicChecker, ObsidianMagicChecker
 
 
@@ -30,7 +34,7 @@ class File:
         while True:
             line = self.readable.readline()
             if line == "":
-                return get_empty_anki_generator()
+                return None
 
             line = line.strip()
             match = re.match(FileProcessingConstans.BASIC_CARD_REGEX, line)
@@ -49,5 +53,9 @@ class File:
 
             yield self.__get_basic_card(front, indentation_level)
 
-    def __get_basic_card(self, front: str, indentation_level: int) -> AnkiBasicCard:
+    def __get_basic_card(
+            self,
+            front: str,
+            indentation_level: int
+            ) -> AnkiBasicCard:
         return AnkiBasicCard(front, "backy")

@@ -23,4 +23,4 @@ class RepositoryProcessor:
                     continue
 
                 with open(file) as readable:
-                     yield File(readable).process_file()
+                    yield File(readable).process_file()
