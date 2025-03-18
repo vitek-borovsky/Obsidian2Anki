@@ -7,7 +7,7 @@ class AnkiCard(ABC):
     pass
 
 @dataclass
-class AnkiClasicCard(AnkiCard):
+class AnkiBasicCard(AnkiCard):
     front: str
     back: str
 

@@ -1,4 +1,4 @@
-from ..ankiCard import AnkiFileRecord, AnkiClasicCard
+from ..ankiCard import AnkiFileRecord, AnkiBasicCard
 from ..ankiAPI.ankiAPI import _RequestBuilder, AnkiAPI
 from pprint import pprint
 
@@ -34,7 +34,7 @@ def test_request_builder():
     assert request == CORRECT
 
 def test_basic_card():
-    cards = (c for c in [AnkiClasicCard("front", "bak")])
+    cards = (c for c in [AnkiBasicCard("front", "bak")])
     afc = (afc for afc in [AnkiFileRecord("College::PluginDev", cards)])
     api = AnkiAPI()
     api.process_file_records(afc)

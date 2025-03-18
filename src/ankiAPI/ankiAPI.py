@@ -1,6 +1,6 @@
 from typing import Generator, Self
 
-from ..ankiCard import AnkiCard, AnkiClasicCard, AnkiFileRecord, AnkiReverseCard, AnkiClozeCard
+from ..ankiCard import AnkiCard, AnkiBasicCard, AnkiFileRecord, AnkiReverseCard, AnkiClozeCard
 
 """For now we will only use it to create notes"""
 class _RequestBuilder:
@@ -73,7 +73,7 @@ class AnkiAPI:
                 self._create_card(deck_name, card)
 
     def _create_card(self, deck_name: str, card: AnkiCard) -> None:
-        if isinstance(card, AnkiClasicCard):
+        if isinstance(card, AnkiBasicCard):
             self._create_basic_card(deck_name, card)
             return
 
@@ -87,7 +87,7 @@ class AnkiAPI:
 
         raise RuntimeError("Unknown child of AnkiCard")
 
-    def _create_basic_card(self, deck_name: str, card: AnkiClasicCard) -> None:
+    def _create_basic_card(self, deck_name: str, card: AnkiBasicCard) -> None:
         self._request_builder.add_basic_note(deck_name, card.front, card.back)
 
     def _create_reverse_card(self, deck_name: str, card: AnkiReverseCard) -> None:
