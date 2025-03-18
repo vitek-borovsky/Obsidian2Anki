@@ -1,4 +1,4 @@
-class FileProcessingConstatns:
+class FileProcessingConstans:
     INDENTATION_SEQUENCE = "> "
     INDENTATION_KEY = "INDENTATION"
     FRONT_KEY =  "FRONT"
@@ -10,4 +10,4 @@ class FileProcessingConstatns:
         """Creates a regex that checks whether a line starts with
         at lest n indentations
         """
-        return f"({FileProcessingConstatns.INDENTATION_SEQUENCE}){{{n}}}"
+        return f"({FileProcessingConstans.INDENTATION_SEQUENCE}){{{n}}}"

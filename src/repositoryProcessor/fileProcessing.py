@@ -1,7 +1,8 @@
-from typing import IO
+from typing import IO, Generator
+import re
 
-from .fileProcessingConstants import FileProcessingConstatns
-from ..ankiCard import AnkiCard, AnkiFileRecord
+from .fileProcessingConstants import FileProcessingConstans
+from ..ankiCard import AnkiBasicCard, AnkiCard, AnkiFileRecord, get_empty_anki_generator
 from .magicChecker import MagicChecker, ObsidianMagicChecker
 
 
@@ -15,7 +16,7 @@ class File:
     """
     # TODO
     def __init__(self, readable: IO[str]) -> None:
-        self.readable = readable
+        self.readable: IO[str] = readable
         self.magic_checker: MagicChecker = ObsidianMagicChecker()
 
     def process_file(self) -> AnkiFileRecord:
@@ -26,3 +27,27 @@ class File:
         return AnkiFileRecord(magic, self.__get_cards())
 
     def __get_cards(self) -> Generator[AnkiCard, None, None]:
+        while True:
+            line = self.readable.readline()
+            if line == "":
+                return get_empty_anki_generator()
+
+            line = line.strip()
+            match = re.match(FileProcessingConstans.BASIC_CARD_REGEX, line)
+            if match is None:
+                continue
+
+            indentation_level_str: str = match.group(
+                FileProcessingConstans.INDENTATION_KEY)
+
+            assert len(indentation_level_str) % 2 == 0
+            indentation_level = len(indentation_level_str) // \
+                len(FileProcessingConstans.INDENTATION_SEQUENCE)
+
+            front = match.group(
+                FileProcessingConstans.FRONT_KEY)
+
+            yield self.__get_basic_card(front, indentation_level)
+
+    def __get_basic_card(self, front: str, indentation_level: int) -> AnkiBasicCard:
+        return AnkiBasicCard(front, "backy")
