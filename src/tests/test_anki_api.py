@@ -1,31 +1,44 @@
-from ..ankiAPI.ankiAPI import RequestBuilder
+from ..ankiCard import AnkiFileRecord, AnkiClasicCard
+from ..ankiAPI.ankiAPI import _RequestBuilder, AnkiAPI
 from pprint import pprint
 
-def test_basic():
-    request = RequestBuilder() \
+
+# This is coppied from the official doccumentation
+# The non-existant model card is removed
+# https://git.sr.ht/~foosoft/anki-connect#card-actions
+CORRECT = {
+   "action":"addNotes",
+   "version":6,
+   "params":{
+      "notes":[
+         {
+            "deckName":"College::PluginDev",
+            "modelName":"Basic",
+            "fields":{
+               "Front":"front",
+               "Back":"bak"
+            }
+         }
+      ]
+   }
+}
+
+def test_request_builder():
+    request = _RequestBuilder() \
         .set_action("addNotes") \
         .add_basic_note("College::PluginDev", "front", "bak" ) \
         .build()
 
-        # This is coppied from the official doccumentation
-        # The non-existant model card is removed
-        # https://git.sr.ht/~foosoft/anki-connect#card-actions
-    CORRECT = {
-       "action":"addNotes",
-       "version":6,
-       "params":{
-          "notes":[
-             {
-                "deckName":"College::PluginDev",
-                "modelName":"Basic",
-                "fields":{
-                   "Front":"front",
-                   "Back":"bak"
-                }
-             }
-          ]
-       }
-    }
+    pprint(request)
+    pprint(CORRECT)
+    assert request == CORRECT
+
+def test_basic_card():
+    cards = (c for c in [AnkiClasicCard("front", "bak")])
+    afc = (afc for afc in [AnkiFileRecord("College::PluginDev", cards)])
+    api = AnkiAPI()
+    api.process_file_records(afc)
+    request = api.get_request()
     pprint(request)
     pprint(CORRECT)
     assert request == CORRECT

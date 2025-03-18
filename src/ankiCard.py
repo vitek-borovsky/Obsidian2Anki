@@ -1,12 +1,15 @@
 from abc import ABC
+from dataclasses import dataclass
 from typing import Generator
 
 
 class AnkiCard(ABC):
     pass
 
+@dataclass
 class AnkiClasicCard(AnkiCard):
-    pass
+    front: str
+    back: str
 
 class AnkiReverseCard(AnkiCard):
     pass

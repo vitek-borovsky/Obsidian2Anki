@@ -1,10 +1,9 @@
 from typing import Generator, Self
-from functools import singledispatch
 
 from ..ankiCard import AnkiCard, AnkiClasicCard, AnkiFileRecord, AnkiReverseCard, AnkiClozeCard
 
 """For now we will only use it to create notes"""
-class RequestBuilder:
+class _RequestBuilder:
     def __init__(self) -> None:
         self.action = None
         self.notes = []
@@ -59,31 +58,43 @@ class AnkiAPI:
     TARGET_PORT = 8765
     API_VERSION = 6
 
-    @staticmethod
+    def __init__(self) -> None:
+        self._request_builder = _RequestBuilder()
+        # TODO this is only for testing
+        self._request_builder.set_action("addNotes")
+
     def process_file_records(
+            self,
             anki_file_records: Generator[AnkiFileRecord, None, None]
         ) -> None:
         for file_record in anki_file_records:
             deck_name = file_record.get_deck_name()
             for card in file_record:
-                AnkiAPI.__create_card(deck_name, card)
+                self._create_card(deck_name, card)
 
-    @singledispatch
-    @staticmethod
-    def __create_card(deck_name: str, card: AnkiCard) -> None:
-        raise RuntimeError("Calling abstract method")
+    def _create_card(self, deck_name: str, card: AnkiCard) -> None:
+        if isinstance(card, AnkiClasicCard):
+            self._create_basic_card(deck_name, card)
+            return
 
-    @__create_card.register(AnkiClasicCard)
-    @staticmethod
-    def _(deck_name: str, card: AnkiClasicCard) -> None:
+        if isinstance(card, AnkiReverseCard):
+            self._create_reverse_card(deck_name, card)
+            return
+
+        if isinstance(card, AnkiClozeCard):
+            self._create_cloze_card(deck_name, card)
+            return
+
+        raise RuntimeError("Unknown child of AnkiCard")
+
+    def _create_basic_card(self, deck_name: str, card: AnkiClasicCard) -> None:
+        self._request_builder.add_basic_note(deck_name, card.front, card.back)
+
+    def _create_reverse_card(self, deck_name: str, card: AnkiReverseCard) -> None:
         raise NotImplemented
 
-    @__create_card.register(AnkiReverseCard)
-    @staticmethod
-    def _(deck_name: str, card: AnkiReverseCard) -> None:
+    def _create_cloze_card(self, deck_name: str, card: AnkiClozeCard) -> None:
         raise NotImplemented
 
-    @__create_card.register(AnkiClozeCard)
-    @staticmethod
-    def _(deck_name: str, card: AnkiClozeCard) -> None:
-        raise NotImplemented
+    def get_request(self) -> dict:
+        return self._request_builder.build()

@@ -1,7 +1,7 @@
 from typing import IO
 
 from .fileProcessingConstants import *
-from ankiCard import AnkiFileRecord
+from ..ankiCard import AnkiFileRecord
 from .magicChecker import MagicChecker, ObsidianMagicChecker
 
 
