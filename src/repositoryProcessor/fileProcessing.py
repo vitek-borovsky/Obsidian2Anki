@@ -1,7 +1,7 @@
 from typing import IO
 
-from .fileProcessingConstants import *
-from ..ankiCard import AnkiFileRecord
+from .fileProcessingConstants import FileProcessingConstatns
+from ..ankiCard import AnkiCard, AnkiFileRecord
 from .magicChecker import MagicChecker, ObsidianMagicChecker
 
 
@@ -23,4 +23,6 @@ class File:
         if magic is None:
             return AnkiFileRecord("NONE")
 
-        raise NotImplemented
+        return AnkiFileRecord(magic, self.__get_cards())
+
+    def __get_cards(self) -> Generator[AnkiCard, None, None]:
