@@ -26,7 +26,7 @@ def get_empty_anki_generator() -> Generator[AnkiCard, None, None]:
 
 
 class AnkiFileRecord:
-    deck_name: str
+    _deck_name: str
     cards: Generator[AnkiCard, None, None]
 
     def __init__(
@@ -34,11 +34,11 @@ class AnkiFileRecord:
             deck_name: str,
             cards: Generator[AnkiCard, None, None] = get_empty_anki_generator()
              ) -> None:
-        self.deck_name = deck_name
+        self._deck_name = deck_name
         self.cards = cards
 
     def __iter__(self):
         yield from self.cards
 
     def get_deck_name(self):
-        return self.deck_name
+        return self._deck_name

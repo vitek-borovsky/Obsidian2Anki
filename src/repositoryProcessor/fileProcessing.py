@@ -1,7 +1,7 @@
 from typing import IO, Generator
 import re
 
-from .fileProcessingConstants import FileProcessingConstans
+from .fileProcessingConstants import FileProcessingConstants
 from ..ankiCard import \
     AnkiCard, \
     AnkiBasicCard, \
@@ -18,10 +18,10 @@ class File:
     - Read and store target deck name
     - Process the rest of the file and create AnkiCard objects
     """
-    # TODO
     def __init__(self, readable: IO[str]) -> None:
         self.readable: IO[str] = readable
         self.magic_checker: MagicChecker = ObsidianMagicChecker()
+        self.line = ""
 
     def process_file(self) -> AnkiFileRecord:
         magic = self.magic_checker.get_magic(self.readable)
@@ -31,31 +31,38 @@ class File:
         return AnkiFileRecord(magic, self.__get_cards())
 
     def __get_cards(self) -> Generator[AnkiCard, None, None]:
+        self.line = self.readable.readline()
         while True:
-            line = self.readable.readline()
-            if line == "":
+            if self.line == "":
                 return None
 
-            line = line.strip()
-            match = re.match(FileProcessingConstans.BASIC_CARD_REGEX, line)
-            if match is None:
+            basic_card = self.__try_match_basic_card()
+            if basic_card is not None:
+                yield basic_card
                 continue
 
-            indentation_level_str: str = match.group(
-                FileProcessingConstans.INDENTATION_KEY)
+            self.line = self.readable.readline()
 
-            assert len(indentation_level_str) % 2 == 0
-            indentation_level = len(indentation_level_str) // \
-                len(FileProcessingConstans.INDENTATION_SEQUENCE)
+    def __get_lines_while_prefix_matched(self, prefix: str) -> str:
+        """Expects first(front) line to be already read and matched """
+        body = []
+        while True:
+            self.line = self.readable.readline()
+            if self.line == "":  # EOF
+                break
 
-            front = match.group(
-                FileProcessingConstans.FRONT_KEY)
+            if not self.line.startswith(prefix):
+                break
 
-            yield self.__get_basic_card(front, indentation_level)
+            body.append(self.line.removeprefix(prefix))
+        return "".join(body)
 
-    def __get_basic_card(
-            self,
-            front: str,
-            indentation_level: int
-            ) -> AnkiBasicCard:
-        return AnkiBasicCard(front, "backy")
+    def __try_match_basic_card(self) -> AnkiCard | None:
+        match = re.match(FileProcessingConstants.BASIC_CARD_REGEX, self.line)
+        if not match:
+            return None
+
+        prefix = match.group(FileProcessingConstants.INDENTATION_KEY)
+        front = match.group(FileProcessingConstants.FRONT_KEY)
+        back = self.__get_lines_while_prefix_matched(prefix)
+        return AnkiBasicCard(front.strip(), back.strip())
