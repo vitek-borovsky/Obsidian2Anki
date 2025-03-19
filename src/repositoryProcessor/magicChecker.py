@@ -18,6 +18,9 @@ class ObsidianMagicChecker(MagicChecker):
     REGEX_KEY_VALUE = "__VALUE__"
     KEY_VALUE_REGEX = f"^(?P<{ REGEX_KEY_KEY }>.+):(?P<{ REGEX_KEY_VALUE }>.+)"
 
+    ANKI_SUBFOLDER_SEQUENCE = "::"
+    OBSIDIAN_SUBFOLDER_SEQUENCE = "/"
+
     def get_magic(self, readable: IO[str]) -> str | None:
         """Finding a value of Anki: tag
         Tags are in the header of the file
@@ -50,4 +53,8 @@ class ObsidianMagicChecker(MagicChecker):
             if key != self.ANKI_TAG_KEY:
                 continue
 
-            return match.group(self.REGEX_KEY_VALUE).strip()
+            return match.group(self.REGEX_KEY_VALUE) \
+                .strip() \
+                .replace(
+                    ObsidianMagicChecker.OBSIDIAN_SUBFOLDER_SEQUENCE,
+                    ObsidianMagicChecker.ANKI_SUBFOLDER_SEQUENCE)

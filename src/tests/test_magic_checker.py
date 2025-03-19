@@ -60,3 +60,15 @@ Anki: TARGET_DECK
 def test_tag_beyond_metadata_not_detected(checker, string):
     readable = StringIO(string)
     assert checker.get_magic(readable) is None
+
+
+@pytest.mark.parametrize("string, deck_name", [
+    ("""---
+Anki: TARGET DECK/SUB DECK
+---
+    """, "TARGET DECK::SUB DECK")
+])
+def test_sub_deck(checker, string, deck_name):
+    readable = StringIO(string)
+    magic = checker.get_magic(readable)
+    assert magic == deck_name
