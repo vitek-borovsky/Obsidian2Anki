@@ -27,9 +27,9 @@ def test_possitive(checker: ObsidianMagicChecker, string, value):
 
 
 @pytest.mark.parametrize("string, value", [
-    ("""---
-Anki: TARGET DECK
-Anki: OTHER DECK
+    (f"""---
+{ANKI_KEY}: TARGET DECK
+{ANKI_KEY}: OTHER DECK
 ---
     """, "TARGET DECK")
 ])
@@ -51,10 +51,10 @@ def test_negative(checker, string):
 
 
 @pytest.mark.parametrize("string", [
-    ("""---
+    (f"""---
 SOME_TAG: TARGET DECK
 ---
-Anki: TARGET_DECK
+{ANKI_KEY}: TARGET_DECK
     """)
 ])
 def test_tag_beyond_metadata_not_detected(checker, string):
@@ -63,8 +63,8 @@ def test_tag_beyond_metadata_not_detected(checker, string):
 
 
 @pytest.mark.parametrize("string, deck_name", [
-    ("""---
-Anki: TARGET DECK/SUB DECK
+    (f"""---
+{ANKI_KEY}: TARGET DECK/SUB DECK
 ---
     """, "TARGET DECK::SUB DECK")
 ])
