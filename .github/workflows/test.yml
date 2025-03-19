@@ -23,4 +23,4 @@ jobs:
 
       - name: Run Pytest
         working-directory: src
-        run: pytest tests/
+        run: PYTHONPATH=. pytest tests/

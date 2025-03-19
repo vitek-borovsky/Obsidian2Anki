@@ -105,9 +105,9 @@ class AnkiAPI:
         raise NotImplementedError()
 
     def _get_request(self) -> dict:
-         return self._request_builder.build()
+        return self._request_builder.build()
 
-    def send_request(self, target_url, target_port) -> None:
+    def send_request(self, target_url, target_port) -> requests.Response:
         url = f"{target_url}:{target_port}"
         payload = self._get_request()
-        requests.post(url=url, json=payload)
+        return requests.post(url=url, json=payload)

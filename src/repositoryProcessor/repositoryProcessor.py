@@ -2,15 +2,16 @@ from pathlib import Path
 from queue import Queue
 from typing import Generator
 
-from ankiCard import AnkiFileRecord
+from ..ankiCard import AnkiFileRecord
 from .fileProcessing import File
 
 
 class RepositoryProcessor:
+    DESIRED_SUFFIXES = [".md"]
     def __init__(self, repository_root: Path) -> None:
         self.repository_root = repository_root
 
-    def execute(self) -> Generator[AnkiFileRecord]:
+    def execute(self) -> Generator[AnkiFileRecord, None, None]:
         subfolders: Queue[Path] = Queue()
         subfolders.put(self.repository_root)
 
@@ -22,5 +23,8 @@ class RepositoryProcessor:
                     subfolders.put(file)
                     continue
 
-                with open(file) as readable:
+                if file.suffix not in self.DESIRED_SUFFIXES:
+                    continue
+
+                with open(file, 'r') as readable:
                     yield File(readable).process_file()
