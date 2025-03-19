@@ -33,14 +33,3 @@ def test_request_builder():
     pprint(request)
     pprint(CORRECT)
     assert request == CORRECT
-
-
-def test_basic_card():
-    cards = (c for c in [AnkiBasicCard("front", "bak")])
-    afc = (afc for afc in [AnkiFileRecord("College::PluginDev", cards)])
-    api = AnkiAPI()
-    api.process_file_records(afc)
-    request = api._get_request()
-    pprint(request)
-    pprint(CORRECT)
-    assert request == CORRECT

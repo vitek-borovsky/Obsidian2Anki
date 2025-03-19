@@ -2,7 +2,7 @@ from typing import IO, Generator
 import re
 
 from .fileProcessingConstants import FileProcessingConstants
-from ..ankiCard import \
+from ankiCard import \
     AnkiCard, \
     AnkiBasicCard, \
     AnkiFileRecord

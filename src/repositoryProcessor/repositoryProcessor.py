@@ -2,12 +2,13 @@ from pathlib import Path
 from queue import Queue
 from typing import Generator
 
-from ..ankiCard import AnkiFileRecord
+from ankiCard import AnkiFileRecord
 from .fileProcessing import File
 
 
 class RepositoryProcessor:
     DESIRED_SUFFIXES = [".md"]
+
     def __init__(self, repository_root: Path) -> None:
         self.repository_root = repository_root
 

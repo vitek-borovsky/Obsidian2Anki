@@ -1,7 +1,8 @@
 from typing import Generator, Self
 import requests
+import json
 
-from ..ankiCard import \
+from ankiCard import \
     AnkiCard, \
     AnkiBasicCard, \
     AnkiFileRecord, \
@@ -10,62 +11,87 @@ from ..ankiCard import \
 
 
 class RequestBuilder:
+    API_VERSION = 6
+
+    ACTION_MULTI = "multi"
+    ACTION_CREATE_DECK = "createDeck"
+    ACTION_ADD_NOTE = "addNote"
+
+    ACTION_KEY = "action"
+    ACTIONS_KEY = "actions"
+    VERSION_KEY = "version"
+    PARAMS_KEY = "params"
+    NOTE_KEY = "note"
+    DECK_NAME_KEY = "deckName"
+    FIELDS_KEY = "fields"
+    MODEL_NAME_KEY = "modelName"
+
+
     """For now we will only use it to create notes"""
     def __init__(self) -> None:
-        self.action = None
-        self.notes = []
+        self.decks = set()
+        self.create_note_action = []
 
-    def __set_deck_name(self, note: dict, deck_name: str) -> None:
-        DECKNAME_KEY = "deckName"
-        assert DECKNAME_KEY not in note
-        note[DECKNAME_KEY] = deck_name
-
-    def __set_model_name(self, note: dict, model_name: str) -> None:
-        MODELNAME_KEY = "modelName"
-        assert MODELNAME_KEY not in note
-        note[MODELNAME_KEY] = model_name
-
-    def __set_fields(self, note: dict, **kw) -> None:
-        FIELDS_KEY = "fields"
-        assert FIELDS_KEY not in note
-        note[FIELDS_KEY] = kw
-
-    def set_action(self, action: str) -> Self:
-        self.action = action
-        return self
+    def __make_note(self, deck_name: str, model_name: str, **fields_dict) -> dict:
+        self.decks.add(deck_name)
+        return {
+            self.ACTION_KEY: self.ACTION_ADD_NOTE,
+            self.VERSION_KEY: self.API_VERSION,
+            self.PARAMS_KEY: {
+                self.NOTE_KEY: {
+                    self.DECK_NAME_KEY: deck_name,
+                    self.MODEL_NAME_KEY: model_name,
+                    self.FIELDS_KEY: fields_dict
+                }
+            }
+        }
 
     def add_basic_note(self, deck_name: str, front: str, back: str) -> Self:
         BASIC_MODEL_NAME = "Basic"
-        BASIC_FRONT = "Front"
-        BASIC_BACK = "Back"
-        note = {}
-        self.__set_deck_name(note, deck_name)
-        self.__set_model_name(note, BASIC_MODEL_NAME)
-        self.__set_fields(note, **{BASIC_FRONT: front, BASIC_BACK: back})
-        self.notes.append(note)
+        BASIC_FRONT_KEY = "Front"
+        BASIC_BACK_KEY = "Back"
+
+        fields_dict = {
+            BASIC_FRONT_KEY: front,
+            BASIC_BACK_KEY: back
+        }
+
+        note = self.__make_note(
+            deck_name,
+            BASIC_MODEL_NAME,
+            **fields_dict
+        )
+
+        self.create_note_action.append(note)
         return self
 
+    def _build_deck_name(self, deck_name) -> dict:
+        DECK_KEY = "deck"
+        return {
+            self.ACTION_KEY: self.ACTION_CREATE_DECK,
+            self.VERSION_KEY: self.API_VERSION,
+            self.PARAMS_KEY: {
+                DECK_KEY: deck_name
+            }
+        }
+
     def build(self) -> dict:
-        ACTION_KEY = "action"
-        VERSION_KEY = "version"
-        PARAMS_KEY = "params"
+        build_deck_actions = [self._build_deck_name(deck_name)
+                                for deck_name in self.decks]
         NOTES_KEY = "notes"
         return {
-            ACTION_KEY: self.action,
-            VERSION_KEY: AnkiAPI.API_VERSION,
-            PARAMS_KEY: {
-                NOTES_KEY: self.notes
+            self.ACTION_KEY: self.ACTION_MULTI,
+            self.VERSION_KEY: self.API_VERSION,
+            self.PARAMS_KEY: {
+                self.ACTIONS_KEY:
+                    build_deck_actions + self.create_note_action
             }
         }
 
 
 class AnkiAPI:
-    API_VERSION = 6
-
     def __init__(self) -> None:
         self._request_builder = RequestBuilder()
-        # TODO this is only for testing
-        self._request_builder.set_action("addNotes")
 
     def process_file_records(
             self,
@@ -110,4 +136,5 @@ class AnkiAPI:
     def send_request(self, target_url, target_port) -> requests.Response:
         url = f"{target_url}:{target_port}"
         payload = self._get_request()
+        print(json.dumps(payload)) # for easy buetyfing
         return requests.post(url=url, json=payload)

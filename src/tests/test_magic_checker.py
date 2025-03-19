@@ -1,7 +1,7 @@
 import pytest
 from io import StringIO
 
-from ..repositoryProcessor.magicChecker import ObsidianMagicChecker
+from repositoryProcessor.magicChecker import ObsidianMagicChecker
 
 ANKI_KEY = ObsidianMagicChecker.ANKI_TAG_KEY
 

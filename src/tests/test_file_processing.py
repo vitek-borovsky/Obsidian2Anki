@@ -1,8 +1,8 @@
 import pytest
 from io import StringIO
 
-from ..repositoryProcessor.fileProcessing import File
-from ..ankiCard import AnkiBasicCard
+from repositoryProcessor.fileProcessing import File
+from ankiCard import AnkiBasicCard
 
 
 @pytest.mark.parametrize("string", [

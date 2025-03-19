@@ -1,4 +1,4 @@
-from ..repositoryProcessor.fileProcessingConstants import \
+from repositoryProcessor.fileProcessingConstants import \
     FileProcessingConstants
 
 

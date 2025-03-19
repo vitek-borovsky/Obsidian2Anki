@@ -1,5 +1,5 @@
 ---
-Anki: Test/Main
+Anki: Test/First
 ---
 
 > [!anki]- This is first cards's front

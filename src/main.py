@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import json
 
 from pathlib import Path
 from ankiAPI.ankiAPI import AnkiAPI
@@ -16,7 +17,11 @@ def main(
 
     anki_api = AnkiAPI()
     anki_api.process_file_records(file_records)
-    anki_api.send_request(TARGET_URL, TARGET_PORT)
+    response = anki_api.send_request(TARGET_URL, TARGET_PORT)
+    response_json = json.dumps(response.json())
+    print()
+    print(response_json)
+
 
 
 if __name__ == '__main__':
