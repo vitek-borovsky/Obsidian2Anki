@@ -72,3 +72,25 @@ def test_sub_deck(checker, string, deck_name):
     readable = StringIO(string)
     magic = checker.get_magic(readable)
     assert magic == deck_name
+
+
+@pytest.mark.parametrize("string, deck_name", [
+    (f"""---
+{ANKI_KEY}: TARGET DECK
+""", "TARGET DECK")
+])
+def test_metadata_not_closed_with_match(checker, string, deck_name):
+    readable = StringIO(string)
+    magic = checker.get_magic(readable)
+    assert magic == deck_name
+
+
+@pytest.mark.parametrize("string", [
+    ("""---
+SOME_TAG: TARGET DECK
+""")
+])
+def test_metadata_not_closed_with_no_match(checker, string):
+    readable = StringIO(string)
+    magic = checker.get_magic(readable)
+    assert magic is None

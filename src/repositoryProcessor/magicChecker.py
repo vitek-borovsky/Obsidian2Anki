@@ -9,7 +9,6 @@ class MagicChecker(ABC):
 
 
 class ObsidianMagicChecker(MagicChecker):
-    """"""
     METADATA_SEPARATOR = "---"
     ANKI_TAG_KEY = "Anki"
     REGEX_KEY_KEY = "__KEY__"
@@ -18,6 +17,20 @@ class ObsidianMagicChecker(MagicChecker):
 
     ANKI_SUBFOLDER_SEQUENCE = "::"
     OBSIDIAN_SUBFOLDER_SEQUENCE = "/"
+
+    def _is_metadata_start_or_end(self, line: str) -> bool:
+        """Expects already striped line of any trailing whitespace
+
+        :param line: line to check
+        :return:
+        """
+        return line == self.METADATA_SEPARATOR
+
+    def _read_till_end_of_metadata(self, readable) -> None:
+        while line := readable.readline():
+            line = line.rstrip()
+            if self._is_metadata_start_or_end(line):
+                break
 
     def get_magic(self, readable: IO[str]) -> str | None:
         """Finding a value of Anki: tag
@@ -29,17 +42,13 @@ class ObsidianMagicChecker(MagicChecker):
         :param readable: IO object that has `.readline()` implemented
         :return: The value of a magic or None if not found
         """
-        first_line = readable.readline().rstrip()
-        if first_line != self.METADATA_SEPARATOR:
+        line = readable.readline().rstrip()
+        if not self._is_metadata_start_or_end(line):
             return None
 
-        while True:
-            line = readable.readline()
-            if line == "":  # EOF
-                break
+        while line := readable.readline():
             line = line.rstrip()
-
-            if line == self.METADATA_SEPARATOR:
+            if self._is_metadata_start_or_end(line):
                 break
 
             match = re.match(self.KEY_VALUE_REGEX, line)
@@ -50,14 +59,7 @@ class ObsidianMagicChecker(MagicChecker):
             if key != self.ANKI_TAG_KEY:
                 continue
 
-            # Read until we reach the end of metadata
-            while True:
-                line = readable.readline()
-                if line == "":  # EOF
-                    break
-                line = line.rstrip()
-                if line == self.METADATA_SEPARATOR:
-                    break
+            self._read_till_end_of_metadata(readable)
 
             return match.group(self.REGEX_KEY_VALUE) \
                 .strip() \
