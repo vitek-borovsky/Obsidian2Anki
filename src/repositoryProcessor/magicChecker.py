@@ -9,9 +9,7 @@ class MagicChecker(ABC):
 
 
 class ObsidianMagicChecker(MagicChecker):
-    """TODO if we find the magic we still need to progress the readable
-    to the end of metadata
-    """
+    """"""
     METADATA_SEPARATOR = "---"
     ANKI_TAG_KEY = "Anki"
     REGEX_KEY_KEY = "__KEY__"
@@ -35,7 +33,6 @@ class ObsidianMagicChecker(MagicChecker):
         if first_line != self.METADATA_SEPARATOR:
             return None
 
-        # Read until we reach the end of metadata
         while True:
             line = readable.readline()
             if line == "":  # EOF
@@ -52,6 +49,15 @@ class ObsidianMagicChecker(MagicChecker):
             key: str = match.group(self.REGEX_KEY_KEY).strip()
             if key != self.ANKI_TAG_KEY:
                 continue
+
+            # Read until we reach the end of metadata
+            while True:
+                line = readable.readline()
+                if line == "":  # EOF
+                    break
+                line = line.rstrip()
+                if line == self.METADATA_SEPARATOR:
+                    break
 
             return match.group(self.REGEX_KEY_VALUE) \
                 .strip() \

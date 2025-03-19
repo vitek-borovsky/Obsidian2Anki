@@ -68,7 +68,7 @@ def test_match_in_metadata_not_detected(string):
     afr = f.process_file()
 
     cards = list(afr.cards)
-    assert cards == [AnkiBasicCard("This is front", "This is back")]
+    assert cards == []
 
 
 @pytest.mark.parametrize("string", [
