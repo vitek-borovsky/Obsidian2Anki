@@ -1,4 +1,5 @@
 from typing import Generator, Self
+import requests
 
 from ..ankiCard import \
     AnkiCard, \
@@ -59,8 +60,6 @@ class RequestBuilder:
 
 
 class AnkiAPI:
-    TARGET_URL = "http://127.0.0.1"
-    TARGET_PORT = 8765
     API_VERSION = 6
 
     def __init__(self) -> None:
@@ -105,5 +104,10 @@ class AnkiAPI:
     def _create_cloze_card(self, deck_name: str, card: AnkiClozeCard) -> None:
         raise NotImplementedError()
 
-    def get_request(self) -> dict:
-        return self._request_builder.build()
+    def _get_request(self) -> dict:
+         return self._request_builder.build()
+
+    def send_request(self, target_url, target_port) -> None:
+        url = f"{target_url}:{target_port}"
+        payload = self._get_request()
+        requests.post(url=url, json=payload)

@@ -40,7 +40,7 @@ def test_basic_card():
     afc = (afc for afc in [AnkiFileRecord("College::PluginDev", cards)])
     api = AnkiAPI()
     api.process_file_records(afc)
-    request = api.get_request()
+    request = api._get_request()
     pprint(request)
     pprint(CORRECT)
     assert request == CORRECT
