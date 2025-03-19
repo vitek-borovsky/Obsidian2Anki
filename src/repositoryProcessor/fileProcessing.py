@@ -64,7 +64,7 @@ class File:
             return reverse_card
 
     def __try_match_basic_card(self) -> AnkiBasicCard | None:
-        match = re.match(FileProcessingConstants.REVERSE_CARD_REGEX, self.line)
+        match = re.match(FileProcessingConstants.BASIC_CARD_REGEX, self.line)
         if not match:
             return None
 
@@ -74,7 +74,7 @@ class File:
         return AnkiBasicCard(front.strip(), back.strip())
 
     def __try_match_reverse_card(self) -> AnkiReverseCard | None:
-        match = re.match(FileProcessingConstants.BASIC_CARD_REGEX, self.line)
+        match = re.match(FileProcessingConstants.REVERSE_CARD_REGEX, self.line)
         if not match:
             return None
 

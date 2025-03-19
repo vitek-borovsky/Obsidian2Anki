@@ -2,7 +2,7 @@ import pytest
 from io import StringIO
 
 from repositoryProcessor.fileProcessing import File
-from ankiCard import AnkiBasicCard
+from ankiCard import AnkiBasicCard, AnkiReverseCard
 
 
 @pytest.mark.parametrize("string", [
@@ -85,10 +85,33 @@ r
 asrt
 """)
 ])
-def test_match(string):
+def test_match_basic_card(string):
     readable = StringIO(string)
     f = File(readable)
     afr = f.process_file()
 
     cards = list(afr.cards)
     assert cards == [AnkiBasicCard("This is front", "This is back")]
+
+
+@pytest.mark.parametrize("string", [
+    ("""---
+Anki: Target Deck
+---
+astnoinsatiast
+
+ast
+as
+r
+> [!ankiR] This is front
+> This is back
+asrt
+""")
+])
+def test_match_reverse_card(string):
+    readable = StringIO(string)
+    f = File(readable)
+    afr = f.process_file()
+
+    cards = list(afr.cards)
+    assert cards == [AnkiReverseCard("This is front", "This is back")]
