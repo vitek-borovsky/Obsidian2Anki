@@ -13,8 +13,10 @@ class AnkiBasicCard(AnkiCard):
     back: str
 
 
+@dataclass
 class AnkiReverseCard(AnkiCard):
-    pass
+    front: str
+    back: str
 
 
 class AnkiClozeCard(AnkiCard):

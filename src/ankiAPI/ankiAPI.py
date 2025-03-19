@@ -65,6 +65,25 @@ class RequestBuilder:
         self.create_note_action.append(note)
         return self
 
+    def add_reverse_note(self, deck_name: str, front: str, back: str) -> Self:
+        REVERSE_MODEL_NAME = "Basic (and reversed card)"
+        BASIC_FRONT_KEY = "Front"
+        BASIC_BACK_KEY = "Back"
+
+        fields_dict = {
+            BASIC_FRONT_KEY: front,
+            BASIC_BACK_KEY: back
+        }
+
+        note = self.__make_note(
+            deck_name,
+            REVERSE_MODEL_NAME,
+            **fields_dict
+        )
+
+        self.create_note_action.append(note)
+        return self
+
     def _build_deck_name(self, deck_name) -> dict:
         DECK_KEY = "deck"
         return {
@@ -78,7 +97,7 @@ class RequestBuilder:
     def build(self) -> dict:
         build_deck_actions = [self._build_deck_name(deck_name)
                                 for deck_name in self.decks]
-        NOTES_KEY = "notes"
+        # NOTES_KEY = "notes"
         return {
             self.ACTION_KEY: self.ACTION_MULTI,
             self.VERSION_KEY: self.API_VERSION,
@@ -118,14 +137,16 @@ class AnkiAPI:
         raise RuntimeError("Unknown child of AnkiCard")
 
     def _create_basic_card(self, deck_name: str, card: AnkiBasicCard) -> None:
-        self._request_builder.add_basic_note(deck_name, card.front, card.back)
+        self._request_builder.add_basic_note(
+            deck_name, card.front, card.back)
 
     def _create_reverse_card(
             self,
             deck_name: str,
             card: AnkiReverseCard
             ) -> None:
-        raise NotImplementedError()
+        self._request_builder.add_reverse_note(
+            deck_name, card.front, card.back)
 
     def _create_cloze_card(self, deck_name: str, card: AnkiClozeCard) -> None:
         raise NotImplementedError()
