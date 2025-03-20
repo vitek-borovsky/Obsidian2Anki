@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 import sys
-import json
+import logging
 
 from pathlib import Path
 from ankiAPI.ankiAPI import AnkiAPI
 from repositoryProcessor.repositoryProcessor import RepositoryProcessor
+
+
+logger = logging.getLogger(__name__)
 
 
 def main(
@@ -12,15 +15,14 @@ def main(
         TARGET_URL: str = "http://127.0.0.1",
         TARGET_PORT: int = 8765
         ) -> None:
+    logging.basicConfig(filename='ObsidianToAnki.log', level=logging.DEBUG)
+
     repository_processor = RepositoryProcessor(Path(vault_root))
     file_records = repository_processor.execute()
 
     anki_api = AnkiAPI()
     anki_api.process_file_records(file_records)
-    response = anki_api.send_request(TARGET_URL, TARGET_PORT)
-    response_json = json.dumps(response.json())
-    print()
-    print(response_json)
+    _ = anki_api.send_request(TARGET_URL, TARGET_PORT)
 
 
 if __name__ == '__main__':

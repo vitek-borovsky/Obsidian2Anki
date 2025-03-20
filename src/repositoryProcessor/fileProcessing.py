@@ -1,5 +1,6 @@
 from typing import IO, Generator
 import re
+import logging
 
 from .fileProcessingConstants import FileProcessingConstants
 from ankiCard import \
@@ -9,6 +10,9 @@ from ankiCard import \
     AnkiFileRecord
 
 from .magicChecker import MagicChecker, ObsidianMagicChecker
+
+
+logger = logging.getLogger(__name__)
 
 
 class File:
@@ -27,8 +31,10 @@ class File:
     def process_file(self) -> AnkiFileRecord:
         magic = self.magic_checker.get_magic(self.readable)
         if magic is None:
+            logger.debug("Magic not found, Exiting file")
             return AnkiFileRecord("NONE")
 
+        logger.info(f"Magic found and is {magic}")
         return AnkiFileRecord(magic, self.__get_cards())
 
     def __get_cards(self) -> Generator[AnkiCard, None, None]:
@@ -36,6 +42,7 @@ class File:
         while self.line != "":
             card = self.__try_match_card_header()
             if card is not None:
+                logger.info(f"Found card in {card.__repr__()}")
                 yield card
 
             self.line = self.readable.readline()
@@ -62,6 +69,7 @@ class File:
         reverse_card = self.__try_match_reverse_card()
         if reverse_card is not None:
             return reverse_card
+        logger.debug(f"Line {self.line.__repr__()} not matched as start of a line")
 
     def __try_match_basic_card(self) -> AnkiBasicCard | None:
         match = re.match(FileProcessingConstants.BASIC_CARD_REGEX, self.line)

@@ -162,5 +162,4 @@ class AnkiAPI:
     def send_request(self, target_url, target_port) -> requests.Response:
         url = f"{target_url}:{target_port}"
         payload = self._get_request()
-        print(json.dumps(payload))  # for easy beautifying
         return requests.post(url=url, json=payload)
