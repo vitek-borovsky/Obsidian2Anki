@@ -10,6 +10,7 @@ from ankiCard import \
     AnkiFileRecord
 
 from .magicChecker import MagicChecker, ObsidianMagicChecker
+from config import BASIC_MODEL_NAME, REVERSE_MODEL_NAME
 
 
 logger = logging.getLogger(__name__)
@@ -69,10 +70,12 @@ class File:
         reverse_card = self.__try_match_reverse_card()
         if reverse_card is not None:
             return reverse_card
-        logger.debug(f"Line {self.line.__repr__()} not matched as start of a line")
+        logger.debug(
+            f"Line {self.line.__repr__()} not matched as start of a line")
 
     def __try_match_basic_card(self) -> AnkiBasicCard | None:
-        match = re.match(FileProcessingConstants.BASIC_CARD_REGEX, self.line)
+        regex = FileProcessingConstants.CALLOUT_KEY_TO_REGEX[BASIC_MODEL_NAME]
+        match = re.match(regex, self.line)
         if not match:
             return None
 
@@ -82,7 +85,9 @@ class File:
         return AnkiBasicCard(front.strip(), back.strip())
 
     def __try_match_reverse_card(self) -> AnkiReverseCard | None:
-        match = re.match(FileProcessingConstants.REVERSE_CARD_REGEX, self.line)
+        regex = \
+            FileProcessingConstants.CALLOUT_KEY_TO_REGEX[REVERSE_MODEL_NAME]
+        match = re.match(regex, self.line)
         if not match:
             return None
 

@@ -32,7 +32,8 @@ class RepositoryProcessor:
                     continue
 
                 if file.suffix not in self.DESIRED_SUFFIXES:
-                    logger.debug(f"File does not match by extension {file.suffix}")
+                    logger.debug(
+                        f"File does not match by extension {file.suffix}")
                     continue
 
                 with open(file, 'r') as readable:

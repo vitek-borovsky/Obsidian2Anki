@@ -1,6 +1,5 @@
 from typing import Generator, Self
 import requests
-import json
 
 from ankiCard import \
     AnkiCard, \
@@ -8,6 +7,8 @@ from ankiCard import \
     AnkiFileRecord, \
     AnkiReverseCard, \
     AnkiClozeCard
+
+from config import BASIC_MODEL_NAME, REVERSE_MODEL_NAME
 
 
 class RequestBuilder:
@@ -50,7 +51,7 @@ class RequestBuilder:
         }
 
     def add_basic_note(self, deck_name: str, front: str, back: str) -> Self:
-        BASIC_MODEL_NAME = "Basic"
+        # I'm considering theese keys note-type specific
         BASIC_FRONT_KEY = "Front"
         BASIC_BACK_KEY = "Back"
 
@@ -69,7 +70,6 @@ class RequestBuilder:
         return self
 
     def add_reverse_note(self, deck_name: str, front: str, back: str) -> Self:
-        REVERSE_MODEL_NAME = "Basic (and reversed card)"
         BASIC_FRONT_KEY = "Front"
         BASIC_BACK_KEY = "Back"
 
