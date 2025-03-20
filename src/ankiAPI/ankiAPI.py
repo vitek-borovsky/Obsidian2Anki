@@ -26,13 +26,16 @@ class RequestBuilder:
     FIELDS_KEY = "fields"
     MODEL_NAME_KEY = "modelName"
 
-
-    """For now we will only use it to create notes"""
     def __init__(self) -> None:
         self.decks = set()
         self.create_note_action = []
 
-    def __make_note(self, deck_name: str, model_name: str, **fields_dict) -> dict:
+    def __make_note(
+            self,
+            deck_name: str,
+            model_name: str,
+            **fields_dict
+            ) -> dict:
         self.decks.add(deck_name)
         return {
             self.ACTION_KEY: self.ACTION_ADD_NOTE,
@@ -95,9 +98,11 @@ class RequestBuilder:
         }
 
     def build(self) -> dict:
-        build_deck_actions = [self._build_deck_name(deck_name)
-                                for deck_name in self.decks]
-        # NOTES_KEY = "notes"
+        build_deck_actions = [
+            self._build_deck_name(deck_name)
+            for deck_name in self.decks
+        ]
+        #  NOTES_KEY = "notes"
         return {
             self.ACTION_KEY: self.ACTION_MULTI,
             self.VERSION_KEY: self.API_VERSION,
@@ -157,5 +162,5 @@ class AnkiAPI:
     def send_request(self, target_url, target_port) -> requests.Response:
         url = f"{target_url}:{target_port}"
         payload = self._get_request()
-        print(json.dumps(payload)) # for easy buetyfing
+        print(json.dumps(payload))  # for easy beautifying
         return requests.post(url=url, json=payload)

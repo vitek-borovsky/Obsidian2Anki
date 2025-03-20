@@ -23,7 +23,6 @@ def main(
     print(response_json)
 
 
-
 if __name__ == '__main__':
     vault_dir = sys.argv[1]
     main(vault_dir)
