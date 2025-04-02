@@ -15,34 +15,25 @@ Notes will be same if:
     - One side of a note is the same
 """
 
+# id: int
 # deck_name: str has to be coppied over to all children
 # @dataclass officialy sucks
 
 class AnkiCard(ABC):
+    id: int
     deck_name: str
     @staticmethod
-    def from_response(body):
+    def from_response(id: int, body):
         deck_name = body["deckName"]
         model_name = body["modelName"]
 
         if model_name == BASIC_MODEL_NAME:
             front = body["question"]
             back = body["answer"]
-            return AnkiBasicCard(front=front, back=back, deck_name=deck_name)
+            return AnkiBasicCard(id=id, front=front, back=back, deck_name=deck_name)
 
 
         raise NotImplemented("AnkiCard -> Unknown type")
-
-        # {
-        #         "answer": "back content",
-        #         "question": "front content",
-        #         "deckName": "Default",
-        #         "modelName": "Basic",
-        #         "fieldOrder": 1,
-        #         "fields": {
-        #             "Front": {"value": "front content", "order": 0},
-        #             "Back": {"value": "back content", "order": 1}
-        #         },
 
     def is_almost_same(self, other) -> bool:
         """
@@ -57,6 +48,7 @@ class AnkiCard(ABC):
 
 @dataclass
 class AnkiBasicCard(AnkiCard):
+    id: int
     deck_name: str
     front: str
     back: str
@@ -74,6 +66,7 @@ class AnkiBasicCard(AnkiCard):
 
 @dataclass
 class AnkiReverseCard(AnkiCard):
+    id: int
     deck_name: str
     front: str
     back: str

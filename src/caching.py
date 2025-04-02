@@ -113,14 +113,21 @@ class AnkiIDCache:
         with open(filename, 'wb') as file:
             pickle.dump(self._cache, file, pickle.HIGHEST_PROTOCOL)
 
-    def get(self, deck_name: str, card: AnkiCard) -> Action:
+    def get(self, deck_name: str, card: AnkiCard) -> tuple[Action, int]:
         if deck_name not in self._cache:
             self._cache[deck_name] = []
 
         if deck_name not in self._deck_cache_records:
             cards = self.anki_api.get_notes_by_id(self._cache[deck_name])
             self._deck_cache_records[deck_name] = \
-                { AnkiCard.from_response(body) for body in cards }
+                { AnkiCard.from_response(id, body) for id, body in cards }
 
-        # TODO
-        return Action.CREATE
+        cache_records = self._deck_cache_records[deck_name]
+        for i_card in cache_records:
+            if card == i_card:
+                return Action.NO_ACTION, 0 # card exists in exact form
+
+            if card.is_almost_same(i_card):
+                return Action.UPDATE, i_card.id
+
+        return Action.CREATE, 0 # New card

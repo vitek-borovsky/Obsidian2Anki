@@ -82,7 +82,7 @@ class File:
         prefix = match.group(FileProcessingConstants.INDENTATION_KEY)
         front = match.group(FileProcessingConstants.FRONT_KEY)
         back = self.__get_lines_while_prefix_matched(prefix)
-        return AnkiBasicCard(deck_name=deck_name, front=front.strip(), back=back.strip())
+        return AnkiBasicCard(id=0, deck_name=deck_name, front=front.strip(), back=back.strip())
 
     def __try_match_reverse_card(self, deck_name: str) -> AnkiReverseCard | None:
         regex = \
@@ -94,4 +94,4 @@ class File:
         prefix = match.group(FileProcessingConstants.INDENTATION_KEY)
         front = match.group(FileProcessingConstants.FRONT_KEY)
         back = self.__get_lines_while_prefix_matched(prefix)
-        return AnkiReverseCard(deck_name, front.strip(), back.strip())
+        return AnkiReverseCard(id=0, deck_name=deck_name, front=front.strip(), back=back.strip())

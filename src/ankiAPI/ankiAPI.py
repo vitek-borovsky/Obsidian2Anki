@@ -30,7 +30,7 @@ class AnkiAPI:
                 "cards": ids
             }
         }
-        return self._send_request(payload).json()["result"]
+        return zip(ids, self._send_request(payload).json()["result"])
 
     def process_file_records(
             self,
@@ -42,12 +42,12 @@ class AnkiAPI:
 
     def _process_file_record(self, file_record: AnkiFileRecord, deck_name: str) -> None:
         for card in file_record:
-            action = self.id_cacher.get(deck_name, card)
+            action, id = self.id_cacher.get(deck_name, card) # id will only be populated if it's update
             match action:
                 case Action.CREATE:
                     self._create_card(deck_name, card)
                 case Action.UPDATE:
-                    pass # TODO
+                    self._update_card(id, deck_name, card)
                 case Action.NO_ACTION:
                     pass
                 case _:
@@ -92,6 +92,23 @@ class AnkiAPI:
 
         raise RuntimeError("Unknown child of AnkiCard")
 
+    def _update_card(self, id: int, deck_name: str, card: AnkiCard) -> None:
+        self._make_deck_available(deck_name)
+
+        if isinstance(card, AnkiBasicCard):
+            self._update_basic_card(id, deck_name, card)
+            return
+
+        if isinstance(card, AnkiReverseCard):
+            self._update_reverse_card(id, deck_name, card)
+            return
+
+        if isinstance(card, AnkiClozeCard):
+            self._update_cloze_card(id, deck_name, card)
+            return
+
+        raise RuntimeError("Unknown child of AnkiCard")
+
     def _create_basic_card(self, deck_name: str, card: AnkiBasicCard) -> None:
         payload = {
             "action": "addNote",
@@ -108,6 +125,25 @@ class AnkiAPI:
             }
         }
         logger.debug(f"Creating basic card {payload}")
+        self._send_request(payload)
+
+    def _update_basic_card(self, id: int, deck_name: str, card: AnkiBasicCard) -> None:
+        payload = {
+            "action": "addNote",
+            "version": 6,
+            "params": {
+                "note": {
+                    "id": id,
+                    "deckName": deck_name,
+                    "modelName": BASIC_MODEL_NAME,
+                    "fields": {
+                        "Front": card.front,
+                        "Back": card.back,
+                    },
+                }
+            }
+        }
+        logger.debug(f"Updating basic card {payload}")
         self._send_request(payload)
 
     def _create_reverse_card(
@@ -132,7 +168,35 @@ class AnkiAPI:
         logger.debug(f"Creating reverse card {payload}")
         self._send_request(payload)
 
+    def _update_reverse_card(
+            self,
+            id: int,
+            deck_name: str,
+            card: AnkiReverseCard
+            ) -> None:
+        payload = {
+            "action": "addNote",
+            "version": 6,
+            "params": {
+                "note": {
+                    "id": id,
+                    "deckName": deck_name,
+                    "modelName": REVERSE_MODEL_NAME,
+                    "fields": {
+                        "Front": card.front,
+                        "Back": card.back,
+                    },
+                }
+            }
+        }
+        logger.debug(f"Update reverse card {payload}")
+        self._send_request(payload)
+
+
     def _create_cloze_card(self, deck_name: str, card: AnkiClozeCard) -> None:
+        raise NotImplementedError()
+
+    def _update_cloze_card(self, id: int, deck_name: str, card: AnkiClozeCard) -> None:
         raise NotImplementedError()
 
     def _send_request(self, payload: dict) -> requests.Response:
