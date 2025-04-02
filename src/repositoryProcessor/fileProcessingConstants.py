@@ -23,7 +23,7 @@ class FileProcessingConstants:
         """
         REGEX_OR_CHAR = "|"
         callout_keys_regex = REGEX_OR_CHAR.join(callout_keys)
-        indentation = fr"(?P<{ FileProcessingConstants.INDENTATION_KEY }>{FileProcessingConstants.INDENTATION_SEQUENCE})+"  # noqa: 501
+        indentation = fr"(?P<{FileProcessingConstants.INDENTATION_KEY}>({FileProcessingConstants.INDENTATION_SEQUENCE})+)"  # noqa: 501
         main_body = fr"\[!{callout_keys_regex}\][-+]?"
         front_capture = fr" (?P<{ FileProcessingConstants.FRONT_KEY }>.*)"
         return f"{indentation}{main_body}{front_capture}"

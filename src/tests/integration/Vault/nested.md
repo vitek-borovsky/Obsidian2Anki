@@ -2,7 +2,7 @@
 Anki: test/nested
 ---
 
-> [!anki] Outer
+> [!note] Outer
 > This is the outer body
 > > [!anki] Inner
 > > This is the inner body

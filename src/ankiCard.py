@@ -72,6 +72,9 @@ class AnkiFileRecord:
         self._deck_name = deck_name
         self.cards = cards
 
+    def __repr__(self) -> str:
+        return f"AnkiFileRecord({self._deck_name})"
+
     def __iter__(self):
         yield from self.cards
 

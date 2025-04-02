@@ -75,10 +75,18 @@ python src/main.py <path-to-your-vault>
 
 ### Support of nested callouts
 ```md
-> [!anki] This is outer callout
+> [!note] This is outer callout
 > > [!anki]- This is inner callout
 > > text
 ```
+> [!warn]- Nested callouts does not work on anki style callouts
+> you can't have
+> ```md
+> > [!anki] out
+> > > [!anki] in
+> > > body
+> ```
+> only the outer one will be registred
 
 ### My callout css
 Put this in `<Vault>/.obsidian/snippets/anki-callouts.css`

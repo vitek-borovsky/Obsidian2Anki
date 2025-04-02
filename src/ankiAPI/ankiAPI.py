@@ -1,5 +1,6 @@
 from typing import Generator, Self
 import requests
+import logging
 
 from ankiCard import \
     AnkiCard, \
@@ -10,6 +11,8 @@ from ankiCard import \
 
 from config import BASIC_MODEL_NAME, REVERSE_MODEL_NAME
 
+
+logger = logging.getLogger(__name__)
 
 class AnkiAPI:
     def __init__(self, target_url, target_port) -> None:
@@ -22,8 +25,11 @@ class AnkiAPI:
             ) -> None:
         for file_record in anki_file_records:
             deck_name = file_record.get_deck_name()
-            for card in file_record:
-                self._create_card(deck_name, card)
+            self._process_file_record(file_record, deck_name)
+
+    def _process_file_record(self, file_record: AnkiFileRecord, deck_name: str) -> None:
+        for card in file_record:
+            self._create_card(deck_name, card)
 
     def _get_decks(self) -> set[str]:
         payload = {
@@ -79,6 +85,7 @@ class AnkiAPI:
                 }
             }
         }
+        logger.debug(f"Creating basic card {payload}")
         self._send_request(payload)
 
     def _create_reverse_card(
@@ -100,6 +107,7 @@ class AnkiAPI:
                 }
             }
         }
+        logger.debug(f"Creating reverse card {payload}")
         self._send_request(payload)
 
     def _create_cloze_card(self, deck_name: str, card: AnkiClozeCard) -> None:
