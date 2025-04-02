@@ -20,9 +20,8 @@ def main(
     repository_processor = RepositoryProcessor(Path(vault_root))
     file_records = repository_processor.execute()
 
-    anki_api = AnkiAPI()
+    anki_api = AnkiAPI(TARGET_URL, TARGET_PORT)
     anki_api.process_file_records(file_records)
-    _ = anki_api.send_request(TARGET_URL, TARGET_PORT)
 
 
 if __name__ == '__main__':

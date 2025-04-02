@@ -16,10 +16,12 @@ Notes will be same if:
 
 
 class AnkiCard(ABC):
-    def is_almost_same(self, other: AnkiCard) -> bool:
+    def is_almost_same(self, other) -> bool:
         """
         Checks if two notes are "same" i.e. some callout in vault was updated
         """
+        if not other is AnkiCard:
+            return False
         #TODO implement Basic <-> Basic and reversed change
         return False
 
