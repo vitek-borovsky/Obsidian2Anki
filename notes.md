@@ -17,3 +17,9 @@ Auto sync after cards created (is this possible???)
 Cache what cards were created from which cards and recreate/delete/update them if possible
 - Just changed gym -> Gym and it created a new card
 - I think I still want to anchor it by ID<->front
+
+
+It's kind of weird we implement everything with generators and then we all convert them to lists
+to build one massive HTTP request
+Probably would be better to create multiple small ones,
+since we are using them on localhost we don't really care, there is a lot of them
