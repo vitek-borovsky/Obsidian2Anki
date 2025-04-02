@@ -9,12 +9,12 @@ from ankiCard import \
     AnkiReverseCard, \
     AnkiClozeCard
 
-from caching import AnkiIDCache
+from caching import Action, AnkiIDCache
 from config import BASIC_MODEL_NAME, REVERSE_MODEL_NAME
 
 
-
 logger = logging.getLogger(__name__)
+
 
 class AnkiAPI:
     def __init__(self, target_url, target_port) -> None:
@@ -23,7 +23,6 @@ class AnkiAPI:
         self.id_cacher = AnkiIDCache(self)
 
     def get_notes_by_id(self, ids: list[int]):
-        import pdb; pdb.set_trace()
         payload = {
             "action": "cardsInfo",
             "version": 6,
@@ -43,7 +42,16 @@ class AnkiAPI:
 
     def _process_file_record(self, file_record: AnkiFileRecord, deck_name: str) -> None:
         for card in file_record:
-            self._create_card(deck_name, card)
+            action = self.id_cacher.get(deck_name, card)
+            match action:
+                case Action.CREATE:
+                    self._create_card(deck_name, card)
+                case Action.UPDATE:
+                    pass # TODO
+                case Action.NO_ACTION:
+                    pass
+                case _:
+                    raise NotImplemented("Unknown Action")
 
     def _get_decks(self) -> list[str]:
         payload = {
@@ -68,8 +76,6 @@ class AnkiAPI:
         self.available_decks.append(deck_name)
 
     def _create_card(self, deck_name: str, card: AnkiCard) -> None:
-        cache = self.id_cacher[deck_name]
-
         self._make_deck_available(deck_name)
 
         if isinstance(card, AnkiBasicCard):
@@ -130,5 +136,4 @@ class AnkiAPI:
         raise NotImplementedError()
 
     def _send_request(self, payload: dict) -> requests.Response:
-        import pdb; pdb.set_trace()
         return requests.post(url=self.target, json=payload)

@@ -1,3 +1,4 @@
+from enum import Enum
 import logging
 from pathlib import Path
 import os
@@ -59,6 +60,11 @@ class LastEditCache:
     """
     pass
 
+class Action(Enum):
+    CREATE = 0
+    UPDATE = 1
+    NO_ACTION = 2 # The card is exact match
+
 class AnkiIDCache:
     """
     #TODO handle renames
@@ -88,7 +94,7 @@ class AnkiIDCache:
         cache_dir = get_cache_dir()
         cache_file = cache_dir / self.CACHE_FILE
         self._cache: dict[str, list[int]] = self._load_pickle(cache_file)
-        self._deck_cache_records: dict[str, list[AnkiCard]] = { }
+        self._deck_cache_records: dict[str, set[AnkiCard]] = { }
 
     def __del__(self) -> None:
         cache_dir = get_cache_dir()
@@ -107,13 +113,14 @@ class AnkiIDCache:
         with open(filename, 'wb') as file:
             pickle.dump(self._cache, file, pickle.HIGHEST_PROTOCOL)
 
-    def __getitem__(self, deck_name: str) -> list[AnkiCard]:
+    def get(self, deck_name: str, card: AnkiCard) -> Action:
         if deck_name not in self._cache:
             self._cache[deck_name] = []
 
         if deck_name not in self._deck_cache_records:
             cards = self.anki_api.get_notes_by_id(self._cache[deck_name])
             self._deck_cache_records[deck_name] = \
-                [ AnkiCard.from_response(body) for body in cards ]
+                { AnkiCard.from_response(body) for body in cards }
 
-        return self._deck_cache_records[deck_name]
+        # TODO
+        return Action.CREATE
