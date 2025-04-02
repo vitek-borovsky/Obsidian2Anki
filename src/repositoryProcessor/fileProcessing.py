@@ -60,7 +60,7 @@ class File:
                 break
 
             body.append(self.line.removeprefix(prefix))
-        return "".join(body)
+        return "\n".join(body)
 
     def __try_match_card_header(self) -> AnkiCard | None:
         basic_card = self.__try_match_basic_card()
