@@ -26,3 +26,10 @@ since we are using them on localhost we don't really care, there is a lot of the
 
 Documentation for anki api (anki connect):
 https://git.sr.ht/~foosoft/anki-connect
+
+Addons:
+2055492159 Anki connect
+1786114227 Markdown Support | Tables, Code Highlighting, Math, Darkmode
+
+Get models
+curl -s localhost:8765 -X POST -d '{"version" : 6, "action": "modelNames"}'
