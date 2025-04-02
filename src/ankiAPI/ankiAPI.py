@@ -1,4 +1,4 @@
-from typing import Generator, Self
+from typing import Generator
 import requests
 import logging
 
@@ -9,7 +9,9 @@ from ankiCard import \
     AnkiReverseCard, \
     AnkiClozeCard
 
+from caching import AnkiIDCache
 from config import BASIC_MODEL_NAME, REVERSE_MODEL_NAME
+
 
 
 logger = logging.getLogger(__name__)
@@ -18,6 +20,18 @@ class AnkiAPI:
     def __init__(self, target_url, target_port) -> None:
         self.target = f"{target_url}:{target_port}"
         self.available_decks = self._get_decks()
+        self.id_cacher = AnkiIDCache(self)
+
+    def get_notes_by_id(self, ids: list[int]):
+        import pdb; pdb.set_trace()
+        payload = {
+            "action": "cardsInfo",
+            "version": 6,
+            "params": {
+                "cards": ids
+            }
+        }
+        return self._send_request(payload).json()["result"]
 
     def process_file_records(
             self,
@@ -31,13 +45,13 @@ class AnkiAPI:
         for card in file_record:
             self._create_card(deck_name, card)
 
-    def _get_decks(self) -> set[str]:
+    def _get_decks(self) -> list[str]:
         payload = {
             "action": "deckNames",
             "version": 6
         }
         self._send_request(payload)
-        return set()
+        return []
 
     def _make_deck_available(self, deck_name: str) -> None:
         if deck_name in self.available_decks:
@@ -51,9 +65,11 @@ class AnkiAPI:
             }
         }
         self._send_request(payload)
-        self.available_decks.add(deck_name)
+        self.available_decks.append(deck_name)
 
     def _create_card(self, deck_name: str, card: AnkiCard) -> None:
+        cache = self.id_cacher[deck_name]
+
         self._make_deck_available(deck_name)
 
         if isinstance(card, AnkiBasicCard):
@@ -114,4 +130,5 @@ class AnkiAPI:
         raise NotImplementedError()
 
     def _send_request(self, payload: dict) -> requests.Response:
+        import pdb; pdb.set_trace()
         return requests.post(url=self.target, json=payload)

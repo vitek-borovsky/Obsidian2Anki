@@ -91,7 +91,7 @@ def test_match_basic_card(string):
     afr = f.process_file()
 
     cards = list(afr.cards)
-    assert cards == [AnkiBasicCard("This is front", "This is back")]
+    assert cards == [AnkiBasicCard("", "This is front", "This is back")]
 
 
 @pytest.mark.parametrize("string", [
@@ -114,4 +114,4 @@ def test_match_reverse_card(string):
     afr = f.process_file()
 
     cards = list(afr.cards)
-    assert cards == [AnkiReverseCard("This is front", "This is back")]
+    assert cards == [AnkiReverseCard("", "This is front", "This is back")]

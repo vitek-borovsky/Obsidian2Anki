@@ -2,6 +2,8 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Generator
 
+from config import BASIC_MODEL_NAME
+
 """
 Notes will be same if:
 - The note is exact match to diffrent note
@@ -13,9 +15,35 @@ Notes will be same if:
     - One side of a note is the same
 """
 
-
+# deck_name: str has to be coppied over to all children
+# @dataclass officialy sucks
 
 class AnkiCard(ABC):
+    deck_name: str
+    @staticmethod
+    def from_response(body):
+        deck_name = body["deckName"]
+        model_name = body["modelName"]
+
+        if model_name == BASIC_MODEL_NAME:
+            front = body["question"]
+            back = body["answer"]
+            return AnkiBasicCard(front=front, back=back, deck_name=deck_name)
+
+
+        raise NotImplemented("AnkiCard -> Unknown type")
+
+        # {
+        #         "answer": "back content",
+        #         "question": "front content",
+        #         "deckName": "Default",
+        #         "modelName": "Basic",
+        #         "fieldOrder": 1,
+        #         "fields": {
+        #             "Front": {"value": "front content", "order": 0},
+        #             "Back": {"value": "back content", "order": 1}
+        #         },
+
     def is_almost_same(self, other) -> bool:
         """
         Checks if two notes are "same" i.e. some callout in vault was updated
@@ -26,8 +54,10 @@ class AnkiCard(ABC):
         return False
 
 
+
 @dataclass
 class AnkiBasicCard(AnkiCard):
+    deck_name: str
     front: str
     back: str
 
@@ -37,10 +67,14 @@ class AnkiBasicCard(AnkiCard):
 
         return self.front == other.front or \
                self.back  == other.back
+
+    def __hash__(self) -> int:
+        return self.front.__hash__()
 
 
 @dataclass
 class AnkiReverseCard(AnkiCard):
+    deck_name: str
     front: str
     back: str
 
@@ -51,9 +85,14 @@ class AnkiReverseCard(AnkiCard):
         return self.front == other.front or \
                self.back  == other.back
 
+    def __hash__(self) -> int:
+        return self.front.__hash__()
 
 class AnkiClozeCard(AnkiCard):
-    pass
+    deck_name: str
+
+    # def __hash__(self) -> int:
+    #     return self.front.__hash__()
 
 
 def get_empty_anki_generator() -> Generator[AnkiCard, None, None]:

@@ -36,12 +36,12 @@ class File:
             return AnkiFileRecord("NONE")
 
         logger.info(f"Magic found and is {magic}")
-        return AnkiFileRecord(magic, self.__get_cards())
+        return AnkiFileRecord(magic, self.__get_cards(magic))
 
-    def __get_cards(self) -> Generator[AnkiCard, None, None]:
+    def __get_cards(self, deck_name: str) -> Generator[AnkiCard, None, None]:
         self.line = self.readable.readline()
         while self.line != "":
-            card = self.__try_match_card_header()
+            card = self.__try_match_card_header(deck_name)
             if card is not None:
                 logger.info(f"Found card in {card.__repr__()}")
                 yield card
@@ -62,18 +62,18 @@ class File:
             body.append(self.line.removeprefix(prefix))
         return "\n".join(body)
 
-    def __try_match_card_header(self) -> AnkiCard | None:
-        basic_card = self.__try_match_basic_card()
+    def __try_match_card_header(self, deck_name: str) -> AnkiCard | None:
+        basic_card = self.__try_match_basic_card(deck_name)
         if basic_card is not None:
             return basic_card
 
-        reverse_card = self.__try_match_reverse_card()
+        reverse_card = self.__try_match_reverse_card(deck_name)
         if reverse_card is not None:
             return reverse_card
         logger.debug(
             f"Line {self.line.__repr__()} not matched as start of a line")
 
-    def __try_match_basic_card(self) -> AnkiBasicCard | None:
+    def __try_match_basic_card(self, deck_name: str) -> AnkiBasicCard | None:
         regex = FileProcessingConstants.CALLOUT_KEY_TO_REGEX[BASIC_MODEL_NAME]
         match = re.match(regex, self.line)
         if not match:
@@ -82,9 +82,9 @@ class File:
         prefix = match.group(FileProcessingConstants.INDENTATION_KEY)
         front = match.group(FileProcessingConstants.FRONT_KEY)
         back = self.__get_lines_while_prefix_matched(prefix)
-        return AnkiBasicCard(front.strip(), back.strip())
+        return AnkiBasicCard(deck_name=deck_name, front=front.strip(), back=back.strip())
 
-    def __try_match_reverse_card(self) -> AnkiReverseCard | None:
+    def __try_match_reverse_card(self, deck_name: str) -> AnkiReverseCard | None:
         regex = \
             FileProcessingConstants.CALLOUT_KEY_TO_REGEX[REVERSE_MODEL_NAME]
         match = re.match(regex, self.line)
@@ -94,4 +94,4 @@ class File:
         prefix = match.group(FileProcessingConstants.INDENTATION_KEY)
         front = match.group(FileProcessingConstants.FRONT_KEY)
         back = self.__get_lines_while_prefix_matched(prefix)
-        return AnkiReverseCard(front.strip(), back.strip())
+        return AnkiReverseCard(deck_name, front.strip(), back.strip())
