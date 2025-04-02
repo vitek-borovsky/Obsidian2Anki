@@ -73,12 +73,21 @@ class AnkiIDsCache:
         cache_file = cache_dir / self.CACHE_FILE
         self._cache = self._load_pickle(cache_file)
 
+    def __del__(self) -> None:
+        cache_dir = get_cache_dir()
+        cache_file = cache_dir / self.CACHE_FILE
+        self._save_pickle(cache_file)
+
     def _load_pickle(self, filename: Path) -> dict[str, int]:
         if not os.path.exists(filename):
             return {}
 
         with open(filename, 'rb') as file:
              return pickle.load(file)
+
+    def _save_pickle(self, filename: Path) -> None:
+        with open(filename, 'wb') as file:
+            pickle.dump(self._cache, file, pickle.HIGHEST_PROTOCOL)
 
     def __getitem__(self, deckname: str) -> int:
         return self._cache[deckname]
