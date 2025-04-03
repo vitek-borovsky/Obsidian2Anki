@@ -15,6 +15,60 @@ from config import BASIC_MODEL_NAME, REVERSE_MODEL_NAME
 
 logger = logging.getLogger(__name__)
 
+class PayloadBuilder:
+    @staticmethod
+    def _note_base():
+        pass
+
+    @staticmethod
+    def create_basic(deck_name: str, front: str, back: str):
+        return {
+            "action": "addNote",
+            "version": 6,
+            "params": {
+                "note": {
+                    "deckName": deck_name,
+                    "modelName": BASIC_MODEL_NAME,
+                    "fields": {
+                        "Front": front,
+                        "Back": back
+                    },
+                }
+            }
+        }
+
+    @staticmethod
+    def update_basic(id: int, deck_name: str, front: str, back: str):
+        payload = PayloadBuilder.create_basic(deck_name, front, back)
+        payload["action"] = "updateNoteFields"
+        payload["params"]["note"]["id"] = id
+        return payload
+
+    @staticmethod
+    def create_reverse(deck_name: str, front: str, back: str):
+        return {
+            "action": "addNote",
+            "version": 6,
+            "params": {
+                "note": {
+                    "deckName": deck_name,
+                    "modelName": REVERSE_MODEL_NAME,
+                    "fields": {
+                        "Front": front,
+                        "Back": back,
+                    },
+                }
+            }
+        }
+
+    @staticmethod
+    def update_reverse(id: int, deck_name: str, front: str, back: str):
+        payload = PayloadBuilder.create_reverse(deck_name, front, back)
+        payload["action"] = "updateNoteFields"
+        payload["params"]["note"]["id"] = id
+        return payload
+
+
 
 class AnkiAPI:
     def __init__(self, target_url, target_port) -> None:
@@ -110,39 +164,15 @@ class AnkiAPI:
         raise RuntimeError("Unknown child of AnkiCard")
 
     def _create_basic_card(self, deck_name: str, card: AnkiBasicCard) -> None:
-        payload = {
-            "action": "addNote",
-            "version": 6,
-            "params": {
-                "note": {
-                    "deckName": deck_name,
-                    "modelName": BASIC_MODEL_NAME,
-                    "fields": {
-                        "Front": card.front,
-                        "Back": card.back,
-                    },
-                }
-            }
-        }
+        payload = \
+            PayloadBuilder.create_basic(deck_name, card.front, card.back)
         logger.debug(f"Creating basic card {payload}")
         self._send_request(payload)
 
     def _update_basic_card(self, id: int, deck_name: str, card: AnkiBasicCard) -> None:
-        payload = {
-            "action": "addNote",
-            "version": 6,
-            "params": {
-                "note": {
-                    "id": id,
-                    "deckName": deck_name,
-                    "modelName": BASIC_MODEL_NAME,
-                    "fields": {
-                        "Front": card.front,
-                        "Back": card.back,
-                    },
-                }
-            }
-        }
+        payload = \
+            PayloadBuilder.update_basic(id, deck_name, card.front, card.back)
+
         logger.debug(f"Updating basic card {payload}")
         self._send_request(payload)
 
@@ -151,20 +181,8 @@ class AnkiAPI:
             deck_name: str,
             card: AnkiReverseCard
             ) -> None:
-        payload = {
-            "action": "addNote",
-            "version": 6,
-            "params": {
-                "note": {
-                    "deckName": deck_name,
-                    "modelName": REVERSE_MODEL_NAME,
-                    "fields": {
-                        "Front": card.front,
-                        "Back": card.back,
-                    },
-                }
-            }
-        }
+        payload = \
+            PayloadBuilder.create_reverse(deck_name, card.front, card.back)
         logger.debug(f"Creating reverse card {payload}")
         self._send_request(payload)
 
@@ -174,21 +192,8 @@ class AnkiAPI:
             deck_name: str,
             card: AnkiReverseCard
             ) -> None:
-        payload = {
-            "action": "addNote",
-            "version": 6,
-            "params": {
-                "note": {
-                    "id": id,
-                    "deckName": deck_name,
-                    "modelName": REVERSE_MODEL_NAME,
-                    "fields": {
-                        "Front": card.front,
-                        "Back": card.back,
-                    },
-                }
-            }
-        }
+        payload = \
+            PayloadBuilder.update_reverse(id, deck_name, card.front, card.back)
         logger.debug(f"Update reverse card {payload}")
         self._send_request(payload)
 
