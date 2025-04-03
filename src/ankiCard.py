@@ -1,5 +1,4 @@
-from abc import ABC
-from dataclasses import dataclass
+from abc import ABC, abstractmethod
 from typing import Generator
 
 from config import BASIC_MODEL_NAME
@@ -15,13 +14,18 @@ Notes will be same if:
     - One side of a note is the same
 """
 
-# id: int
-# deck_name: str has to be coppied over to all children
-# @dataclass officialy sucks
-
 class AnkiCard(ABC):
     id: int
     deck_name: str
+
+    def __init__(self, id: int, deck_name: str) -> None:
+        self.id = id
+        self.deck_name = deck_name
+
+    @abstractmethod
+    def match_data(self, other) -> bool:
+        raise NotImplemented("This method should be overwritten")
+
     @staticmethod
     def from_response(id: int, body):
         deck_name = body["deckName"]
@@ -41,17 +45,30 @@ class AnkiCard(ABC):
         """
         if not other is AnkiCard:
             return False
+
         #TODO implement Basic <-> Basic and reversed change
+        if (isinstance(self, AnkiBasicCard) and isinstance(other, AnkiReverseCard)) or \
+           (isinstance(other, AnkiBasicCard) and isinstance(self, AnkiReverseCard)):
+            if self.deck_name == other.deck_name and \
+                self.front == other.front and \
+                self.back == other.back:
+                return True
         return False
 
 
 
-@dataclass
 class AnkiBasicCard(AnkiCard):
-    id: int
-    deck_name: str
     front: str
     back: str
+
+    def __init__(self, id: int, deck_name: str, front: str, back: str) -> None:
+        self.front = front
+        self.back = back
+        super().__init__(id, deck_name)
+
+    def match_data(self, other) -> bool:
+        return self.front == other.front and \
+            self.back == other.back
 
     def is_almost_same(self, other: AnkiCard) -> bool:
         if not isinstance(other, AnkiBasicCard):
@@ -64,14 +81,21 @@ class AnkiBasicCard(AnkiCard):
         return self.front.__hash__()
 
 
-@dataclass
 class AnkiReverseCard(AnkiCard):
-    id: int
-    deck_name: str
-    front: str
-    back: str
+    def __init__(self, id: int, deck_name: str, front: str, back: str) -> None:
+        self.front = front
+        self.back = back
+        super().__init__(id, deck_name)
+
+    def match_data(self, other) -> bool:
+        return self.front == other.front and \
+            self.back == other.back
 
     def is_almost_same(self, other: AnkiCard) -> bool:
+        # If the cards have diffrent deck , they must be exact match
+        if self.deck_name != other.deck_name:
+            return self.match_data(other)
+
         if not isinstance(other, AnkiBasicCard):
             return super().is_almost_same(other)
 

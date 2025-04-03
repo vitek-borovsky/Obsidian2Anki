@@ -17,10 +17,6 @@ logger = logging.getLogger(__name__)
 
 class PayloadBuilder:
     @staticmethod
-    def _note_base():
-        pass
-
-    @staticmethod
     def create_basic(deck_name: str, front: str, back: str):
         return {
             "action": "addNote",
@@ -67,7 +63,6 @@ class PayloadBuilder:
         payload["action"] = "updateNoteFields"
         payload["params"]["note"]["id"] = id
         return payload
-
 
 
 class AnkiAPI:
