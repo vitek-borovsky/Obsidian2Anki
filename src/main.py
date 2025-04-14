@@ -17,6 +17,8 @@ def main(
         ) -> None:
     logging.basicConfig(filename='ObsidianToAnki.log', level=logging.DEBUG)
 
+    logger.info(f"Runing on Vault:'{vault_root}'")
+
     repository_processor = RepositoryProcessor(Path(vault_root))
     file_records = repository_processor.execute()
 

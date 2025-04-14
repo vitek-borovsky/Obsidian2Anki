@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Generator
 
-from config import BASIC_MODEL_NAME
+from config import BASIC_MODEL_NAME, REVERSE_MODEL_NAME
 
 """
 Notes will be same if:
@@ -27,17 +27,25 @@ class AnkiCard(ABC):
         raise NotImplemented("This method should be overwritten")
 
     @staticmethod
-    def from_response(id: int, body):
-        deck_name = body["deckName"]
+    def from_response(deck_name: str, body):
+        import pdb; pdb.set_trace()
+        if body == {}:
+            return
+
+        id = body["noteId"]
         model_name = body["modelName"]
 
         if model_name == BASIC_MODEL_NAME:
-            front = body["question"]
-            back = body["answer"]
+            front = body["fields"]["Front"]["value"]
+            back = body["fields"]["Back"]["value"]
             return AnkiBasicCard(id=id, front=front, back=back, deck_name=deck_name)
 
+        if model_name == REVERSE_MODEL_NAME:
+            front = body["question"]
+            back = body["answer"]
+            return AnkiReverseCard(id=id, front=front, back=back, deck_name=deck_name)
 
-        raise NotImplemented("AnkiCard -> Unknown type")
+        raise NotImplemented(f"AnkiCard -> Unknown type {model_name}")
 
     def is_almost_same(self, other) -> bool:
         """
@@ -66,6 +74,9 @@ class AnkiBasicCard(AnkiCard):
         self.back = back
         super().__init__(id, deck_name)
 
+    def __repr__(self) -> str:
+        return f"AnkiBasicCard({self.id}, {self.deck_name}, {self.front.__repr__()}, {self.back.__repr__()})"
+
     def match_data(self, other) -> bool:
         return self.front == other.front and \
             self.back == other.back
@@ -86,6 +97,9 @@ class AnkiReverseCard(AnkiCard):
         self.front = front
         self.back = back
         super().__init__(id, deck_name)
+
+    def __repr__(self) -> str:
+        return f"AnkiReverseCard({self.id}, {self.deck_name}, {self.front.__repr__()}, {self.back.__repr__()})"
 
     def match_data(self, other) -> bool:
         return self.front == other.front and \
@@ -117,7 +131,7 @@ def get_empty_anki_generator() -> Generator[AnkiCard, None, None]:
 
 
 class AnkiFileRecord:
-    _deck_name: str
+    deck_name: str
     cards: Generator[AnkiCard, None, None]
 
     def __init__(
@@ -125,14 +139,11 @@ class AnkiFileRecord:
             deck_name: str,
             cards: Generator[AnkiCard, None, None] = get_empty_anki_generator()
              ) -> None:
-        self._deck_name = deck_name
+        self.deck_name = deck_name
         self.cards = cards
 
     def __repr__(self) -> str:
-        return f"AnkiFileRecord({self._deck_name})"
+        return f"AnkiFileRecord({self.deck_name})"
 
     def __iter__(self):
         yield from self.cards
-
-    def get_deck_name(self):
-        return self._deck_name

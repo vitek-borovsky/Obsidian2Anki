@@ -110,24 +110,53 @@ class AnkiIDCache:
             return pickle.load(file)
 
     def _save_pickle(self, filename: Path) -> None:
+        # this should be redundant
+        _backup = self._cache
+
+        # remove duplicattes
+        self._cache = \
+            { key: list(set(val)) for key, val in self._cache.items() }
+
+        if _backup != self._cache:
+            logger.warning("Cache was trimmed")
+
+        logger.info(f"Saving to {filename} data:{self._cache}")
         with open(filename, 'wb') as file:
             pickle.dump(self._cache, file, pickle.HIGHEST_PROTOCOL)
 
-    def get(self, deck_name: str, card: AnkiCard) -> tuple[Action, int]:
-        if deck_name not in self._cache:
-            self._cache[deck_name] = []
+    def get(self, card: AnkiCard) -> tuple[Action, int]:
+        logger.debug(f"Processing {card.__repr__()}")
+        if card.deck_name not in self._cache:
+            self._cache[card.deck_name] = []
 
-        if deck_name not in self._deck_cache_records:
-            cards = self.anki_api.get_notes_by_id(self._cache[deck_name])
-            self._deck_cache_records[deck_name] = \
-                { AnkiCard.from_response(id, body) for id, body in cards }
+        if card.deck_name not in self._deck_cache_records:
+            logger.info(f"{card.deck_name} not fond in self._deck_cache_records, populating...")
+            cards = self.anki_api.get_notes_by_id(self._cache[card.deck_name])
 
-        cache_records = self._deck_cache_records[deck_name]
+            self._deck_cache_records[card.deck_name] = set()
+            for body in cards:
+                res = AnkiCard.from_response(body)
+                if res is None:
+                    continue
+                self._deck_cache_records[card.deck_name].add(res)
+
+        cache_records = self._deck_cache_records[card.deck_name]
+        logger.debug(f"cache_records[{card.deck_name}]: {cache_records}")
+
         for i_card in cache_records:
             if card == i_card:
+                logger.debug("Card found, no action needed")
                 return Action.NO_ACTION, 0 # card exists in exact form
 
             if card.is_almost_same(i_card):
+                logger.debug("Card found, update needed")
                 return Action.UPDATE, i_card.id
 
+        logger.debug("Card not found, creating...")
         return Action.CREATE, 0 # New card
+
+    def cache(self, deck_name: str, id: int) -> None:
+        if deck_name not in self._cache:
+            self._cache[deck_name] = []
+
+        self._cache[deck_name].append(id)
