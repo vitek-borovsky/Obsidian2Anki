@@ -27,5 +27,15 @@ def main(
 
 
 if __name__ == '__main__':
+    # Expecting parameters in this order
+    # vault_dir
+    # TARGET_URL (defaults to http://127.0.0.1)
+    # TARGET_PORT port for anki connect (defaults to 8765)
+    argc = len(sys.argv)
+    if argc == 1 or argc > 4:
+        raise Exception(f"Wrong number of arguments {argc}")
     vault_dir = sys.argv[1]
-    main(vault_dir)
+    target_url = sys.argv[2] if argc >= 2 else "127.0.0.1"
+    target_port = int(sys.argv[3]) if argc >= 3 else 8765
+
+    main(vault_dir, target_url, target_port)
