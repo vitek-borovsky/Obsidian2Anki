@@ -3,6 +3,8 @@ FROM python:latest
 RUN groupadd -g 1001 anki && \
     useradd -u 1001 -g anki -m anki
 
+USER anki
+
 WORKDIR /home/anki/
 RUN mkdir src
 

@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 def main(
         vault_root: str,
-        TARGET_URL: str = "http://127.0.0.1",
-        TARGET_PORT: int = 8765
+        target_url: str,
+        target_port: int
         ) -> None:
     logging.basicConfig(filename='ObsidianToAnki.log', level=logging.DEBUG)
 
@@ -22,7 +22,7 @@ def main(
     repository_processor = RepositoryProcessor(Path(vault_root))
     file_records = repository_processor.execute()
 
-    anki_api = AnkiAPI(TARGET_URL, TARGET_PORT)
+    anki_api = AnkiAPI(target_url, target_port)
     anki_api.process_file_records(file_records)
 
 
